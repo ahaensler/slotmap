@@ -258,8 +258,8 @@ impl<T> Slottable for T {}
 /// unspecified.
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub struct KeyData {
-    idx: u32,
-    version: NonZeroU32,
+    pub idx: u32,
+    pub version: NonZeroU32,
 }
 
 impl KeyData {
