@@ -129,7 +129,7 @@ impl<T: fmt::Debug> fmt::Debug for Slot<T> {
 #[derive(Debug)]
 pub struct SlotMap<K: Key, V> {
     slots: Vec<Slot<V>>,
-    pub free_head: u32,
+    free_head: u32,
     num_elems: u32,
     _k: PhantomData<fn(K) -> K>,
 }
@@ -891,6 +891,24 @@ impl<K: Key, V> SlotMap<K, V> {
         ValuesMut {
             inner: self.iter_mut(),
         }
+    }
+
+    /// Hack: Resets the slotmap's internal state to key. A call to insert will return the
+    /// specified key. Only use this for restoring previous state and if key is not used.
+    pub fn revert_to_key(&mut self, key: K) {
+        let key_data = key.data();
+        let slot = self.slots.get(key_data.idx as usize).unwrap();
+        if slot.occupied() {
+            unsafe {
+                self.remove_from_slot(key_data.idx as usize);
+            }
+        }
+        let slot = self.slots.get_mut(key_data.idx as usize).unwrap();
+        if self.free_head != key_data.idx {
+            slot.u.next_free = self.free_head;
+            self.free_head = key_data.idx;
+        }
+        slot.version = key_data.version.get().wrapping_sub(1);
     }
 }
 
