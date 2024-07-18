@@ -129,7 +129,7 @@ impl<T: fmt::Debug> fmt::Debug for Slot<T> {
 #[derive(Debug)]
 pub struct SlotMap<K: Key, V> {
     slots: Vec<Slot<V>>,
-    free_head: u32,
+    pub free_head: u32,
     num_elems: u32,
     _k: PhantomData<fn(K) -> K>,
 }
